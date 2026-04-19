@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>什么是机器学习？· 5 分钟看懂</title>
+<style>
+  :root{
+    --text:#37352f; --text-soft:#787774; --text-mute:#9b9a97;
+    --line:#e9e9e7; --bg:#fff; --bg-soft:#f7f6f3; --bg-hover:#efeeec;
+    --blue:#2383e2; --green:#0f7b3a; --red:#e03e3e;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%; overflow:hidden;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    background:var(--bg); color:var(--text);
+    line-height:1.7; font-size:16px;
+  }
+  strong{font-weight:600;}
+
+  /* ===== 底板架构 ===== */
+  .deck{
+    height:100vh; display:flex; flex-direction:column;
+    max-width:920px; margin:0 auto; padding:32px 24px 24px;
+  }
+
+  /* 顶部 */
+  .top{display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;}
+  .dots{display:flex; gap:8px;}
+  .dot{
+    width:24px; height:6px; border-radius:3px; background:var(--line);
+    cursor:pointer; transition:background 0.2s, width 0.2s;
+  }
+  .dot:hover{background:var(--text-mute);}
+  .dot.active{background:var(--blue); width:32px;}
+  .chapter{font-size:13px; color:var(--text-soft);}
+
+  /* 卡片舅道 */
+  .stage{
+    flex:1; position:relative; overflow:hidden; border-radius:8px;
+  }
+  .track{
+    position:absolute; inset:0; display:flex;
+    transition:transform 0.25s ease;
+    will-change:transform;
+  }
+  .card{
+    flex:0 0 100%; height:100%; padding:40px;
+    display:flex; flex-direction:column;
+    overflow-y:auto;
+  }
+  .card h1{font-size:32px; font-weight:700; margin-bottom:8px; letter-spacing:-0.3px;}
+  .card .sub{color:var(--text-soft); font-size:15px; margin-bottom:24px;}
+  .card h2{font-size:18px; font-weight:600; margin:18px 0 10px;}
+  .card p{margin:8px 0;}
+  .card .soft{color:var(--text-soft);}
+
+  /* 底部导航 */
+  .nav{display:flex; justify-content:space-between; align-items:center; margin-top:20px;}
+  .nav-btn{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:10px 18px; background:#fff; border:1px solid var(--line);
+    border-radius:6px; font-size:14px; cursor:pointer; color:var(--text);
+    transition:background 0.15s; font-family:inherit;
+  }
+  .nav-btn:hover:not(:disabled){background:var(--bg-hover);}
+  .nav-btn:disabled{color:var(--text-mute); cursor:not-allowed; opacity:0.5;}
+  .nav-btn.primary{background:var(--blue); color:#fff; border-color:var(--blue);}
+  .nav-btn.primary:hover{background:#1a6fc4;}
+  .hint{font-size:12px; color:var(--text-mute);}
+  kbd{
+    display:inline-block; padding:1px 6px; background:var(--bg-soft);
+    border:1px solid var(--line); border-radius:3px; font-size:11px;
+    font-family:inherit; color:var(--text-soft);
+  }
+
+  /* ===== 通用组件 ===== */
+  .callout{
+    display:flex; gap:12px; align-items:flex-start;
+    background:var(--bg-soft); border-radius:6px; padding:14px 16px; margin:12px 0;
+  }
+  .callout .icon{font-size:18px; flex-shrink:0;}
+  .callout p{margin:2px 0;}
+
+  .demo-label{
+    font-size:12px; color:var(--text-mute); text-transform:uppercase;
+    letter-spacing:1px; margin-bottom:10px; display:flex; align-items:center; gap:6px;
+  }
+  .demo-label .ld{width:6px; height:6px; border-radius:50%; background:var(--blue); animation:blink 1.5s infinite;}
+  @keyframes blink{0%,100%{opacity:1;} 50%{opacity:0.3;}}
+  .play-label{font-size:12px; color:var(--blue); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;}
+
+  .demo-box{background:var(--bg-soft); border-radius:6px; padding:20px; margin:8px 0;}
+  .play-box{border:1px solid var(--line); border-radius:6px; padding:20px; margin:8px 0; background:#fff;}
+
+  .btn{
+    display:inline-flex; align-items:center; gap:6px; padding:8px 14px;
+    background:#fff; border:1px solid var(--line); border-radius:4px;
+    font-size:14px; cursor:pointer; color:var(--text); transition:background 0.15s; font-family:inherit;
+  }
+  .btn:hover{background:var(--bg-hover);}
+  .btn.primary{background:var(--blue); color:#fff; border-color:var(--blue);}
+  .btn.primary:hover{background:#1a6fc4;}
+  .btn-row{display:flex; gap:8px; flex-wrap:wrap;}
+
+  input[type=range]{-webkit-appearance:none; appearance:none; width:100%; height:4px; background:var(--line); border-radius:2px; outline:none;}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:18px; height:18px; background:#fff; border:2px solid var(--blue); border-radius:50%; cursor:pointer;}
+  input[type=range]::-moz-range-thumb{width:18px; height:18px; background:#fff; border:2px solid var(--blue); border-radius:50%; cursor:pointer;}
+
+  .switch{display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--bg-soft); border-radius:4px; cursor:pointer; transition:background 0.15s; font-size:14px;}
+  .switch:hover{background:var(--bg-hover);}
+  .switch input{display:none;}
+  .switch .box{width:30px; height:16px; background:#d3d1cb; border-radius:8px; position:relative; transition:background 0.2s; flex-shrink:0;}
+  .switch .box::after{content:""; position:absolute; top:2px; left:2px; width:12px; height:12px; background:#fff; border-radius:50%; transition:transform 0.2s;}
+  .switch input:checked + .box{background:var(--blue);}
+  .switch input:checked + .box::after{transform:translateX(14px);}
+
+  /* ===== 卡 1：本质 · 例子涌入 → 概念显形 ===== */
+  .essence-quote{
+    text-align:center; padding:20px; background:var(--bg-soft); border-radius:8px;
+    margin:14px 0;
+  }
+  .essence-quote .big{font-size:22px; font-weight:600; line-height:1.5;}
+  .essence-quote .big .hl{color:var(--blue);}
+  .essence-quote .small{font-size:13px; color:var(--text-soft); margin-top:6px;}
+
+  .card-essence{justify-content:space-between;}
+  .essence-stage{
+    flex:1; position:relative; min-height:280px;
+    display:flex; align-items:center; justify-content:center;
+    margin:16px 0; overflow:hidden; border-radius:12px;
+    background:linear-gradient(180deg, #fafaf9 0%, #f1f0ec 100%);
+  }
+  .fog{
+    position:absolute; top:50%; left:50%; width:220px; height:220px;
+    border-radius:50%; transform:translate(-50%,-50%);
+    background:radial-gradient(circle, #9a9489 0%, transparent 70%);
+    filter:blur(24px); opacity:0.7;
+    transition:opacity 0.5s, filter 0.5s;
+  }
+  .concept{
+    position:relative; z-index:2;
+    opacity:0; transform:scale(0.4);
+    transition:opacity 0.9s, transform 0.9s cubic-bezier(.2,.8,.3,1.1);
+  }
+  .concept.show{opacity:1; transform:scale(1);}
+  .concept-icon{font-size:130px; line-height:1; position:relative; z-index:2;}
+  .concept-glow{
+    position:absolute; inset:-40px; border-radius:50%; z-index:1;
+    background:radial-gradient(circle, rgba(35,131,226,0.35) 0%, transparent 65%);
+    animation:essenceGlow 2.4s ease-in-out infinite;
+  }
+  @keyframes essenceGlow{
+    0%,100%{opacity:0.5; transform:scale(0.95);}
+    50%{opacity:1; transform:scale(1.15);}
+  }
+  .flying-sample{
+    position:absolute; font-size:34px; pointer-events:none; z-index:3;
+    transition:left 1.3s cubic-bezier(.35,.1,.3,1), top 1.3s cubic-bezier(.35,.1,.3,1), opacity 1.3s, transform 1.3s;
+  }
+  .essence-caption{
+    position:absolute; bottom:16px; left:50%; transform:translateX(-50%);
+    font-size:14px; color:var(--text-soft); font-weight:500;
+    padding:6px 16px; background:#fff; border:1px solid var(--line);
+    border-radius:20px; white-space:nowrap; z-index:4;
+    transition:all 0.4s;
+  }
+  .essence-caption.bright{
+    color:var(--blue); border-color:var(--blue);
+    font-weight:600; box-shadow:0 2px 14px rgba(35,131,226,0.22);
+  }
+  .essence-tagline{text-align:center; margin-top:8px; padding:6px 0;}
+  .essence-tagline .big{font-size:22px; font-weight:600; color:var(--text); letter-spacing:0.3px;}
+  .essence-tagline .small{font-size:14px; color:var(--text-soft); margin-top:4px;}
+
+  /* ===== 卡 2：像素 ===== */
+  .pixel-stage{display:flex; gap:24px; align-items:center; justify-content:center; flex-wrap:wrap; min-height:140px;}
+  .pixel-side{text-align:center;}
+  .big-emoji{font-size:80px; line-height:1;}
+  .pixel-cap{font-size:13px; color:var(--text-soft); margin-top:8px;}
+  .arrow-r{font-size:22px; color:var(--text-mute);}
+  .pixel-grid{display:grid; gap:1px; background:var(--line); padding:1px; border-radius:2px; margin:0 auto;}
+  .pixel-grid div{background:#fff; transition:background 0.3s;}
+
+  /* ===== 卡 3：代码 + 反例 ===== */
+  .code{background:#2f2f2f; color:#e8e8e8; border-radius:6px; padding:14px 18px; font-family:"SFMono-Regular",Menlo,Consolas,monospace; font-size:13px; line-height:1.7; white-space:pre; overflow-x:auto; min-height:110px;}
+  .code .kw{color:#c792ea;} .code .str{color:#a5d6a7;} .code .cm{color:#7a7a7a;}
+  .cursor{display:inline-block; width:8px; height:14px; background:#e8e8e8; vertical-align:middle; animation:cur 1s infinite;}
+  @keyframes cur{0%,100%{opacity:1;} 50%{opacity:0;}}
+  .counter-examples{margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;}
+  .counter-card{flex:1; min-width:120px; background:var(--bg-soft); border-radius:6px; padding:10px; text-align:center; opacity:0; transform:translateY(8px); transition:all 0.3s;}
+  .counter-card.show{opacity:1; transform:none;}
+  .counter-card .ce{font-size:28px;}
+  .counter-card .ct{font-size:12px; color:var(--text-soft); margin-top:4px;}
+  .counter-card .cf{font-size:12px; color:var(--red); margin-top:2px;}
+
+  /* ===== 卡 4：训练 ===== */
+  .train-stage{position:relative; height:120px; display:flex; align-items:center; justify-content:space-between; padding:0 16px;}
+  .train-source, .train-output{font-size:30px; min-width:60px; text-align:center;}
+  .train-brain{font-size:48px; position:relative; z-index:2;}
+  .train-brain.thinking{animation:think 1s infinite;}
+  @keyframes think{0%,100%{transform:scale(1);} 50%{transform:scale(1.12);}}
+  .train-brain.thinking::after{content:"✨"; position:absolute; top:-8px; right:-12px; font-size:18px; animation:spark 1s infinite;}
+  @keyframes spark{0%,100%{opacity:0; transform:scale(0.5);} 50%{opacity:1; transform:scale(1);}}
+  .flying{position:absolute; font-size:22px; pointer-events:none;}
+  .verdict{font-size:13px; color:var(--green); font-weight:600; opacity:0; transition:opacity 0.4s; margin-top:4px;}
+  .verdict.show{opacity:1;}
+
+  .acc-bar{margin-top:14px;}
+  .acc-label{display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px; color:var(--text-soft);}
+  .acc-label strong{color:var(--text); font-size:18px;}
+  .acc-track{height:8px; background:var(--line); border-radius:4px; overflow:hidden;}
+  .acc-fill{height:100%; background:var(--blue); width:0%; transition:width 0.6s ease;}
+  .acc-emoji{font-size:18px; margin-left:6px;}
+
+  /* ===== 卡 5：总结 ===== */
+  .recap-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:14px 0;}
+  .recap-card{background:var(--bg-soft); border-radius:8px; padding:18px; text-align:center;}
+  .recap-card .emoji{font-size:36px;}
+  .recap-card .name{font-weight:600; margin-top:8px; font-size:14px;}
+  .recap-card .desc{font-size:12px; color:var(--text-soft); margin-top:4px;}
+  .finish{text-align:center; margin-top:16px; padding:18px; border:1px dashed var(--line); border-radius:8px;}
+  .finish .big{font-size:18px; font-weight:600;}
+  .finish .small{font-size:13px; color:var(--text-soft); margin-top:4px;}
+
+  @media (max-width:640px){
+    .compare{grid-template-columns:1fr;}
+    .recap-grid{grid-template-columns:1fr;}
+    .card{padding:24px;}
+    .card h1{font-size:24px;}
+    .essence-quote .big{font-size:18px;}
+  }
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <!-- 顶部：进度 + 章节 -->
+  <div class="top">
+    <div class="dots" id="dots"></div>
+    <div class="chapter" id="chapter">1 / 5 · 本质</div>
+  </div>
+
+  <!-- 卡片舅道 -->
+  <div class="stage">
+    <div class="track" id="track">
+
+      <!-- ============ 卡 1：本质 · 例子涌入 → 概念显形 ============ -->
+      <section class="card card-essence">
+        <h1>🤖 什么是机器学习？</h1>
+        <p class="sub">5 分钟看懂一个改变世界的思想 · 零基础友好</p>
+
+        <div class="essence-stage" id="essenceStage">
+          <div class="fog" id="fog"></div>
+          <div class="concept" id="concept">
+            <div class="concept-glow"></div>
+            <div class="concept-icon">🐱</div>
+          </div>
+          <div class="essence-caption" id="essenceCaption">？</div>
+        </div>
+
+        <div class="essence-tagline">
+          <div class="big">见得多了，自己就明白了。</div>
+          <div class="small">—— 这就是机器学习</div>
+        </div>
+      </section>
+
+      <!-- ============ 卡 2：电脑眼里 ============ -->
+      <section class="card">
+        <h1>第一步 · 电脑眼里只有数字</h1>
+        <p class="sub">你看到的是「猫」，电脑看到的是一堆明暗不同的小方块。</p>
+
+        <div class="demo-box">
+          <div class="demo-label"><span class="ld"></span>动画：电脑正在「读取」这张图</div>
+          <div class="pixel-stage">
+            <div class="pixel-side">
+              <div class="big-emoji">🐱</div>
+              <div class="pixel-cap">你看到的</div>
+            </div>
+            <div class="arrow-r">→</div>
+            <div class="pixel-side">
+              <div class="pixel-grid" id="animGrid"></div>
+              <div class="pixel-cap" id="animCap">电脑看到的</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="play-box">
+          <div class="play-label">🕹️ 拖一拖：调「分辨率」看变化</div>
+          <input type="range" id="resSlider" min="5" max="30" value="10" step="1"/>
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-soft); margin-top:4px;">
+            <span>模糊</span><span>清晰</span>
+          </div>
+          <div style="margin-top:14px; display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
+            <div class="pixel-grid" id="playGrid"></div>
+            <div>
+              <div style="font-size:13px; color:var(--text-soft);">分辨率</div>
+              <div style="font-size:18px; font-weight:600;" id="resText">10 × 10</div>
+              <div style="font-size:13px; color:var(--text-soft); margin-top:6px;">要处理的数字</div>
+              <div style="font-size:18px; font-weight:600; color:var(--blue);" id="numText">100 个</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout"><div class="icon">💡</div><div><p>手机拍一张照片，动辄就是几百万个数字。机器要处理的，是这堆数字。</p></div></div>
+      </section>
+
+      <!-- ============ 卡 3：老办法 ============ -->
+      <section class="card">
+        <h1>第二步 · 靠人写规则？写不完</h1>
+        <p class="sub">人一开始想的是：那我把「猫的特征」写成代码不就行了？</p>
+
+        <div class="demo-box">
+          <div class="demo-label"><span class="ld"></span>动画：代码一行行被写出来</div>
+          <div class="code" id="codeBox"></div>
+        </div>
+
+        <div class="play-box">
+          <div class="play-label">🕹️ 勾选一条规则，看会不会冒出「例外猫」</div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <label class="switch"><input type="checkbox" data-rule="ear"/><span class="box"></span>「猫一定有尖耳朵」</label>
+            <label class="switch"><input type="checkbox" data-rule="whisker"/><span class="box"></span>「猫一定有胡须」</label>
+            <label class="switch"><input type="checkbox" data-rule="tail"/><span class="box"></span>「猫一定有长尾巴」</label>
+          </div>
+          <div class="counter-examples" id="counters"></div>
+        </div>
+
+        <div class="callout"><div class="icon">❌</div><div><p>每一条规则都能被一只「例外猫」打倒。现实太复杂，规则<strong>永远写不完</strong>。</p></div></div>
+      </section>
+
+      <!-- ============ 卡 4：新办法 ============ -->
+      <section class="card">
+        <h1>第三步 · 给例子，让它自己学</h1>
+        <p class="sub">既然规则写不完，那就<strong>不写</strong>——直接给它看大量例子。</p>
+
+        <div class="demo-box">
+          <div class="demo-label"><span class="ld"></span>动画：例子「喂」进大脑，它自己学</div>
+          <div class="train-stage" id="trainStage">
+            <div class="train-source" id="trainSrc">🐱🐶</div>
+            <div class="train-brain" id="trainBrain">🧠</div>
+            <div class="train-output">
+              <div id="trainOut" style="font-size:30px;">?</div>
+              <div class="verdict" id="trainVerdict">✓ 认出来了</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="play-box">
+          <div class="play-label">🕹️ 你来决定「喂」多少张给它学</div>
+          <div class="btn-row">
+            <button class="btn" data-feed="10">喂 10 张</button>
+            <button class="btn" data-feed="100">喂 100 张</button>
+            <button class="btn primary" data-feed="1000">喂 1000 张</button>
+          </div>
+          <div class="acc-bar">
+            <div class="acc-label">
+              <span>识别准确率</span>
+              <span><strong id="accNum">0</strong>%<span class="acc-emoji" id="accEmoji">😶</span></span>
+            </div>
+            <div class="acc-track"><div class="acc-fill" id="accFill"></div></div>
+          </div>
+        </div>
+
+        <div class="callout"><div class="icon">✨</div><div><p>例子越多→ 总结的规律越准→ 遇到新东西猜得越准。</p></div></div>
+      </section>
+
+      <!-- ============ 卡 5：总结 ============ -->
+      <section class="card">
+        <h1>🎉 你已经看懂机器学习了</h1>
+        <p class="sub">回到一开始的那句话——</p>
+
+        <div class="essence-quote">
+          <div class="big">不告诉机器「<span class="hl">规则</span>」，而是给它「<span class="hl">例子</span>」，让它自己找出规律。</div>
+          <div class="small">你现在能真正看懂这句话了 ✨</div>
+        </div>
+
+        <h2>这个思想，它在你身边到处都是</h2>
+        <div class="recap-grid">
+          <div class="recap-card">
+            <div class="emoji">📷</div>
+            <div class="name">人脸识别</div>
+            <div class="desc">看了几亿张人脸后自己学会</div>
+          </div>
+          <div class="recap-card">
+            <div class="emoji">💬</div>
+            <div class="name">ChatGPT</div>
+            <div class="desc">读了几万亿字后自己学会说话</div>
+          </div>
+          <div class="recap-card">
+            <div class="emoji">🎵</div>
+            <div class="name">推荐算法</div>
+            <div class="desc">看了你的点赞后自己学会猜你喜欢什么</div>
+          </div>
+        </div>
+
+        <div class="finish">
+          <div class="big">🎓 恭喜学完本节</div>
+          <div class="small">下一节我们会看看：机器是怎么「学」的？</div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- 底部导航 -->
+  <div class="nav">
+    <button class="nav-btn" id="prev">← 上一页</button>
+    <div class="hint">可用 <kbd>←</kbd> <kbd>→</kbd> 翻页</div>
+    <button class="nav-btn primary" id="next">下一页 →</button>
+  </div>
+
+</div>
+
+<script>
+/* ===== 翻页逻辑 ===== */
+const track = document.getElementById("track");
+const dotsBox = document.getElementById("dots");
+const chapter = document.getElementById("chapter");
+const prev = document.getElementById("prev");
+const next = document.getElementById("next");
+const CHAPTERS = ["本质","第一步","第二步","第三步","总结"];
+const N = 5;
+let cur = 0;
+
+for(let i=0;i<N;i++){
+  const d = document.createElement("div");
+  d.className = "dot" + (i===0?" active":"");
+  d.onclick = ()=>go(i);
+  dotsBox.appendChild(d);
+}
+function go(i){
+  cur = Math.max(0, Math.min(N-1, i));
+  track.style.transform = `translateX(-${cur*100}%)`;
+  document.querySelectorAll(".dot").forEach((d,j)=>d.classList.toggle("active", j===cur));
+  chapter.textContent = `${cur+1} / ${N} · ${CHAPTERS[cur]}`;
+  prev.disabled = cur===0;
+  next.textContent = cur===N-1 ? "重新看一遍 ↻" : "下一页 →";
+}
+prev.onclick = ()=>go(cur-1);
+next.onclick = ()=>{ if(cur===N-1) go(0); else go(cur+1); };
+document.addEventListener("keydown", e=>{
+  if(e.key==="ArrowRight") go(cur+1);
+  else if(e.key==="ArrowLeft") go(cur-1);
+});
+
+/* ===== 像素图生成器 ===== */
+const SHADES = ["#fff","#f0eeea","#dcd9d2","#bdb8ad","#9a9489","#766f63","#544f45","#37352f"];
+function catPattern(size){
+  const arr = []; const cx = size/2, cy = size/2, r = size*0.35;
+  for(let y=0;y<size;y++){
+    const row = [];
+    for(let x=0;x<size;x++){
+      const dx = x-cx, dy = y-cy;
+      const d = Math.sqrt(dx*dx + dy*dy);
+      const earL = (y < size*0.25) && Math.abs(x - size*0.3) < (size*0.25 - y)*0.6;
+      const earR = (y < size*0.25) && Math.abs(x - size*0.7) < (size*0.25 - y)*0.6;
+      let v = 0;
+      if(d < r) v = Math.max(0, 7 - Math.floor(d/r * 6));
+      if(earL || earR) v = Math.max(v, 5);
+      if(Math.abs(dx-size*0.12)<size*0.06 && Math.abs(dy+size*0.05)<size*0.05) v = 7;
+      if(Math.abs(dx+size*0.12)<size*0.06 && Math.abs(dy+size*0.05)<size*0.05) v = 7;
+      row.push(Math.min(7, v));
+    }
+    arr.push(row);
+  }
+  return arr;
+}
+function renderGrid(el, size, cellPx, mask){
+  el.innerHTML = "";
+  el.style.gridTemplateColumns = `repeat(${size}, ${cellPx}px)`;
+  el.style.gridAutoRows = `${cellPx}px`;
+  const pat = catPattern(size); const cells = [];
+  for(let y=0;y<size;y++) for(let x=0;x<size;x++){
+    const d = document.createElement("div");
+    const v = pat[y][x];
+    d.dataset.color = SHADES[v];
+    d.style.background = mask ? "#fff" : SHADES[v];
+    el.appendChild(d); cells.push(d);
+  }
+  return cells;
+}
+
+/* ===== 卡 2：扫描动画 ===== */
+const animGrid = document.getElementById("animGrid");
+const animCap = document.getElementById("animCap");
+function runScan(){
+  const cells = renderGrid(animGrid, 10, 11, true);
+  animCap.textContent = "读取中… 0 / 100";
+  let i = 0;
+  const t = setInterval(()=>{
+    if(i >= cells.length){
+      clearInterval(t);
+      animCap.textContent = "电脑看到的：100 个数字";
+      setTimeout(runScan, 2200);
+      return;
+    }
+    cells[i].style.background = cells[i].dataset.color;
+    animCap.textContent = `读取中… ${i+1} / 100`;
+    i++;
+  }, 22);
+}
+runScan();
+
+/* ===== 卡 2：分辨率滑块 ===== */
+const playGrid = document.getElementById("playGrid");
+const resSlider = document.getElementById("resSlider");
+const resText = document.getElementById("resText");
+const numText = document.getElementById("numText");
+function renderPlay(){
+  const size = +resSlider.value;
+  const cellPx = Math.max(4, Math.floor(160/size));
+  renderGrid(playGrid, size, cellPx, false);
+  resText.textContent = `${size} × ${size}`;
+  numText.textContent = `${size*size} 个`;
+}
+resSlider.addEventListener("input", renderPlay);
+renderPlay();
+
+/* ===== 卡 3：打字机 ===== */
+const codeText = `if 有尖耳朵 and 有胡须 and 有长尾巴:
+    return "猫"
+elif 会汪汪叫 and 喜欢摇尾巴:
+    return "狗"
+# ……还要写一万条`;
+const codeBox = document.getElementById("codeBox");
+function colorize(t){
+  return t
+    .replace(/(#[^\n]*)/g, '<span class="cm">$1</span>')
+    .replace(/("[^"]*")/g, '<span class="str">$1</span>')
+    .replace(/\b(if|elif|else|return|and|or|not)\b/g, '<span class="kw">$1</span>');
+}
+function typeCode(){
+  let i = 0;
+  codeBox.innerHTML = '<span class="cursor"></span>';
+  const t = setInterval(()=>{
+    if(i > codeText.length){
+      clearInterval(t);
+      codeBox.innerHTML = colorize(codeText);
+      setTimeout(typeCode, 3500);
+      return;
+    }
+    codeBox.innerHTML = colorize(codeText.slice(0,i)) + '<span class="cursor"></span>';
+    i++;
+  }, 32);
+}
+typeCode();
+
+/* ===== 卡 3：反例开关 ===== */
+const CE = {
+  ear:     {emoji:"😼", title:"折耳猫", fail:"✕ 没有尖耳朵"},
+  whisker: {emoji:"😽", title:"无毛猫", fail:"✕ 没有胡须"},
+  tail:    {emoji:"🙀", title:"无尾猫", fail:"✕ 没有长尾巴"},
+};
+const countersBox = document.getElementById("counters");
+document.querySelectorAll('[data-rule]').forEach(input=>{
+  input.addEventListener("change", ()=>{
+    countersBox.innerHTML = "";
+    document.querySelectorAll('[data-rule]:checked').forEach(c=>{
+      const ce = CE[c.dataset.rule];
+      const div = document.createElement("div");
+      div.className = "counter-card";
+      div.innerHTML = `<div class="ce">${ce.emoji}</div><div class="ct">${ce.title}</div><div class="cf">${ce.fail}</div>`;
+      countersBox.appendChild(div);
+      requestAnimationFrame(()=>div.classList.add("show"));
+    });
+  });
+});
+
+/* ===== 卡 4：训练动画循环 ===== */
+const trainStage = document.getElementById("trainStage");
+const trainBrain = document.getElementById("trainBrain");
+const trainOut = document.getElementById("trainOut");
+const trainVerdict = document.getElementById("trainVerdict");
+const trainSrc = document.getElementById("trainSrc");
+const SAMPLES = ["🐱","😺","🐈","🙀","😸","😻","🐶","🐕","🦮","🐩"];
+const NEW_IMGS = ["🐈‍⬛","🐱","🐕‍🦺","🐩","🐈"];
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+function flyEmoji(emoji, fromX, toX, y){
+  const f = document.createElement("div");
+  f.className = "flying"; f.textContent = emoji;
+  f.style.left = fromX + "px"; f.style.top = y + "px";
+  f.style.transition = "all 1.1s cubic-bezier(.4,.1,.3,1)";
+  trainStage.appendChild(f);
+  requestAnimationFrame(()=>{
+    f.style.left = toX + "px"; f.style.opacity = "0"; f.style.transform = "scale(0.5)";
+  });
+  setTimeout(()=>f.remove(), 1200);
+}
+async function runTrainCycle(){
+  trainOut.textContent = "?";
+  trainVerdict.classList.remove("show");
+  trainBrain.classList.remove("thinking");
+  trainSrc.textContent = "🐱🐶";
+  await sleep(500);
+  const rect = trainStage.getBoundingClientRect();
+  const brainRect = trainBrain.getBoundingClientRect();
+  const fromX = 30;
+  const toX = brainRect.left - rect.left + 5;
+  for(let i=0;i<6;i++){
+    flyEmoji(SAMPLES[Math.floor(Math.random()*SAMPLES.length)], fromX + Math.random()*30, toX, 25 + Math.random()*50);
+    await sleep(200);
+  }
+  await sleep(400);
+  trainBrain.classList.add("thinking");
+  await sleep(1500);
+  trainBrain.classList.remove("thinking");
+  const test = NEW_IMGS[Math.floor(Math.random()*NEW_IMGS.length)];
+  trainSrc.textContent = test;
+  await sleep(700);
+  trainOut.textContent = "🐱";
+  trainVerdict.classList.add("show");
+  await sleep(2000);
+  runTrainCycle();
+}
+runTrainCycle();
+
+/* ===== 卡 4：喂数据交互 ===== */
+const FEED_MAP = {10:{acc:60, e:"🤔"}, 100:{acc:85, e:"😊"}, 1000:{acc:97, e:"🎉"}};
+const accNum = document.getElementById("accNum");
+const accFill = document.getElementById("accFill");
+const accEmoji = document.getElementById("accEmoji");
+let currentAcc = 0;
+function animateAcc(target){
+  const start = currentAcc; const dur = 700; const t0 = performance.now();
+  function tick(t){
+    const p = Math.min(1, (t-t0)/dur);
+    const v = Math.round(start + (target-start)*p);
+    accNum.textContent = v; accFill.style.width = v + "%";
+    if(p<1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+  currentAcc = target;
+}
+document.querySelectorAll('[data-feed]').forEach(b=>{
+  b.addEventListener("click", ()=>{
+    const n = +b.dataset.feed;
+    const {acc, e} = FEED_MAP[n];
+    animateAcc(acc); accEmoji.textContent = e;
+  });
+});
+
+/* ===== 卡 1：例子涌入 → 概念显形 ===== */
+const essenceStage = document.getElementById("essenceStage");
+const essenceFog = document.getElementById("fog");
+const essenceConcept = document.getElementById("concept");
+const essenceCap = document.getElementById("essenceCaption");
+const CAT_SAMPLES = ["🐱","🐈","🐈‍⬛","😺","😸","😹","😻","😼","😽","🙀","🐅","🦁"];
+function essenceSpawn(){
+  const f = document.createElement("div");
+  f.className = "flying-sample";
+  f.textContent = CAT_SAMPLES[Math.floor(Math.random()*CAT_SAMPLES.length)];
+  const rect = essenceStage.getBoundingClientRect();
+  const w = rect.width, h = rect.height;
+  const side = Math.floor(Math.random()*4);
+  let sx, sy;
+  if(side===0){sx = Math.random()*w; sy = -50;}
+  else if(side===1){sx = w+20; sy = Math.random()*h;}
+  else if(side===2){sx = Math.random()*w; sy = h+20;}
+  else {sx = -50; sy = Math.random()*h;}
+  f.style.left = sx+"px"; f.style.top = sy+"px";
+  f.style.opacity = "1";
+  f.style.transform = "scale(1) rotate("+(Math.random()*30-15)+"deg)";
+  essenceStage.appendChild(f);
+  requestAnimationFrame(()=>{
+    f.style.left = (w/2 - 17)+"px";
+    f.style.top = (h/2 - 17)+"px";
+    f.style.opacity = "0";
+    f.style.transform = "scale(0.15)";
+  });
+  setTimeout(()=>f.remove(), 1400);
+}
+async function runEssenceCycle(){
+  essenceConcept.classList.remove("show");
+  essenceCap.classList.remove("bright");
+  essenceCap.textContent = "？";
+  essenceFog.style.opacity = "0.7";
+  essenceFog.style.filter = "blur(24px)";
+  await sleep(1000);
+  essenceCap.textContent = "收到例子…";
+  const total = 14;
+  for(let i=0;i<total;i++){
+    essenceSpawn();
+    const p = (i+1)/total;
+    essenceFog.style.opacity = (0.7 - p*0.65).toFixed(2);
+    essenceFog.style.filter = "blur("+Math.max(0,(24 - p*22)).toFixed(0)+"px)";
+    await sleep(280);
+  }
+  await sleep(300);
+  essenceConcept.classList.add("show");
+  essenceCap.textContent = "这就是「猫」";
+  essenceCap.classList.add("bright");
+  await sleep(3200);
+  runEssenceCycle();
+}
+runEssenceCycle();
+</script>
+</body>
+</html>
