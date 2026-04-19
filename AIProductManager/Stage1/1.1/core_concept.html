@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>AI 术语图鉴 · 20 个零基础扫盲词</title>
+<style>
+:root{
+  --text:#37352f; --text-soft:#787774; --text-mute:#9b9a97;
+  --line:#e9e9e7; --bg:#fff; --bg-soft:#f7f6f3; --bg-hover:#efeeec;
+  --blue:#2383e2; --blue-soft:#e7f3fb;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;color:var(--text);background:var(--bg);line-height:1.7;display:flex;justify-content:center;}
+.app{max-width:1080px;width:100%;padding:32px 24px 48px;}
+.top h1{font-size:28px;font-weight:700;letter-spacing:-.5px;}
+.top .sub{color:var(--text-soft);font-size:15px;margin-top:8px;}
+
+.tabs{display:flex;gap:4px;flex-wrap:wrap;margin:24px 0 16px;font-size:13px;}
+.tab{padding:5px 12px;border-radius:4px;cursor:pointer;color:var(--text-soft);transition:all .15s;user-select:none;}
+.tab.active{background:var(--blue-soft);color:var(--blue);font-weight:500;}
+.tab:hover:not(.active){background:var(--bg-hover);color:var(--text);}
+.tab .cnt{font-size:11px;color:var(--text-mute);margin-left:4px;}
+.tab.active .cnt{color:var(--blue);opacity:.7;}
+
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.card{border:1px solid var(--line);border-radius:8px;padding:14px 14px 12px;cursor:pointer;background:#fff;transition:all .15s;display:flex;flex-direction:column;gap:4px;min-height:130px;}
+.card:hover{border-color:#d6d4d0;background:var(--bg-soft);transform:translateY(-1px);}
+.card.active{border-color:var(--blue);background:var(--blue-soft);box-shadow:0 0 0 3px rgba(35,131,226,.08);}
+.card .em{font-size:22px;line-height:1;margin-bottom:4px;}
+.card .nm{font-size:14px;font-weight:600;}
+.card .en{font-size:11px;color:var(--text-mute);letter-spacing:.3px;}
+.card .one{font-size:12.5px;color:var(--text-soft);line-height:1.5;margin-top:auto;}
+.card.hidden{display:none;}
+
+.detail{margin-top:20px;border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden;transition:opacity .2s;}
+.detail.fade{opacity:0;}
+.detail.empty{background:var(--bg-soft);padding:34px;text-align:center;color:var(--text-mute);font-size:14px;border-style:dashed;}
+.detail .head{padding:20px 24px 14px;border-bottom:1px solid var(--line);background:var(--bg-soft);}
+.detail .title{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.detail .title .em{font-size:26px;line-height:1;}
+.detail .title .nm{font-size:20px;font-weight:700;}
+.detail .title .en{font-size:13px;color:var(--text-mute);}
+.detail .title .tag{font-size:11px;color:var(--blue);background:var(--blue-soft);padding:2px 8px;border-radius:3px;margin-left:auto;white-space:nowrap;}
+.detail .ana{font-size:13px;color:var(--text-soft);margin-top:6px;}
+.detail .ana::before{content:'💡 ';}
+.detail .body{padding:20px 24px 24px;display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+.detail .stage{background:var(--bg-soft);border:1px solid var(--line);border-radius:8px;min-height:240px;position:relative;overflow:hidden;padding:20px;display:flex;align-items:center;justify-content:center;}
+.detail .explain{font-size:14px;color:var(--text);line-height:1.75;}
+.detail .explain b{color:var(--blue);}
+.detail .explain .ex{margin-top:12px;padding:10px 14px;background:var(--bg-soft);border-left:3px solid var(--blue);font-size:13px;color:var(--text-soft);border-radius:2px;}
+
+/* ===== demo primitives ===== */
+.bbl{display:inline-block;padding:7px 13px;border-radius:14px;font-size:12.5px;max-width:90%;}
+.bbl.u{background:#fff;border:1px solid var(--line);align-self:flex-end;}
+.bbl.ai{background:var(--blue);color:#fff;align-self:flex-start;}
+.bbl.sys{background:#fff;border:1px dashed var(--blue);color:var(--blue);font-size:11px;font-style:italic;align-self:center;}
+.bbl.err{background:#fef1f1;border:1px solid #e8b4b4;color:#a82020;align-self:flex-start;}
+.chat{display:flex;flex-direction:column;gap:6px;width:100%;max-width:340px;}
+.fadeIn{animation:fadeIn .45s both;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+.tok-row{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;}
+.tok-tile{background:#fff;border:1px solid var(--line);border-radius:4px;padding:8px 12px;font-size:17px;font-weight:500;animation:tokPop .5s both;animation-delay:var(--d,0s);}
+@keyframes tokPop{0%{opacity:0;transform:translateY(-8px) scale(.7);}60%{opacity:1;transform:scale(1.08);}100%{transform:scale(1);}}
+
+.ctxw{position:relative;width:100%;font-size:11.5px;line-height:1.8;color:var(--text-mute);padding:6px;}
+.ctxw p{padding:2px 8px;margin:0;transition:color .4s;}
+.ctxw .win{position:absolute;left:0;right:0;background:rgba(35,131,226,.08);border:2px solid var(--blue);border-radius:4px;pointer-events:none;animation:winSlide 6s ease-in-out infinite alternate;height:48px;}
+@keyframes winSlide{0%{top:6px;}100%{top:calc(100% - 54px);}}
+
+.plane{position:relative;width:100%;height:200px;background:linear-gradient(#eee 1px,transparent 1px) 0 0/20px 20px,linear-gradient(90deg,#eee 1px,transparent 1px) 0 0/20px 20px,#fff;border:1px solid var(--line);border-radius:4px;}
+.plane .dot{position:absolute;font-size:11.5px;padding:3px 8px;background:#fff;border:1px solid var(--line);border-radius:12px;animation:fadeIn .6s both;animation-delay:var(--d,0s);}
+.plane .dot.hi{border-color:var(--blue);color:var(--blue);font-weight:600;}
+
+.tbar{display:grid;grid-template-columns:46px 1fr 36px;gap:8px;align-items:center;font-size:12px;margin-bottom:5px;}
+.tbar .bw{font-weight:600;text-align:right;}
+.tbar .bt{height:13px;background:#fff;border:1px solid var(--line);border-radius:3px;overflow:hidden;}
+.tbar .bf{height:100%;background:var(--blue-soft);border-right:2px solid var(--blue);transition:width .7s;}
+.tbar .bp{color:var(--text-soft);font-variant-numeric:tabular-nums;}
+.temp-ui{width:100%;max-width:300px;}
+.temp-ui .slider{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:12px;color:var(--text-soft);}
+.temp-ui .slider input{flex:1;accent-color:var(--blue);}
+.temp-ui .tlab{font-weight:600;color:var(--blue);min-width:42px;text-align:right;font-variant-numeric:tabular-nums;}
+
+.cot{display:flex;flex-direction:column;gap:8px;width:100%;max-width:320px;}
+.cot .think{background:#fff;border:1px dashed var(--text-mute);border-radius:6px;padding:8px 12px;font-size:11.5px;color:var(--text-soft);font-family:ui-monospace,Menlo,monospace;line-height:1.6;}
+.cot .think div{animation:fadeIn .5s both;}
+
+.flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:center;width:100%;}
+.flow .node{background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-size:11.5px;text-align:center;min-width:72px;animation:fadeIn .5s both;animation-delay:var(--d,0s);}
+.flow .node .ei{font-size:20px;display:block;margin-bottom:2px;}
+.flow .node.hi{border-color:var(--blue);background:var(--blue-soft);color:var(--blue);}
+.flow .arrow{color:var(--text-mute);font-size:16px;animation:fadeIn .5s both;animation-delay:var(--d,0s);}
+
+.hub{position:relative;width:100%;height:230px;}
+.hub .core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--blue);color:#fff;border-radius:50%;width:60px;height:60px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 0 4px rgba(35,131,226,.15);z-index:2;}
+.hub .spoke{position:absolute;background:#fff;border:1px solid var(--line);border-radius:6px;padding:5px 9px;font-size:11px;animation:fadeIn .5s both;animation-delay:var(--d,0s);z-index:2;}
+.hub .spoke.hi{border-color:var(--blue);background:var(--blue-soft);color:var(--blue);font-weight:600;}
+.hub .spoke.dim{opacity:.4;}
+.hub svg{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;}
+.hub svg line{stroke:var(--line);stroke-width:1.5;}
+.hub svg line.hi{stroke:var(--blue);stroke-width:2;}
+
+.brains{display:flex;gap:28px;align-items:flex-end;justify-content:center;width:100%;}
+.brn{text-align:center;}
+.brn .face{font-size:30px;margin-bottom:4px;}
+.brn .dots{display:grid;gap:2px;padding:6px;background:#fff;border:1px solid var(--line);border-radius:4px;}
+.brn .dot{width:5px;height:5px;background:var(--blue);border-radius:50%;opacity:.5;animation:dotPulse 1.4s ease-in-out infinite;animation-delay:var(--d,0s);}
+@keyframes dotPulse{0%,100%{opacity:.3;}50%{opacity:.95;}}
+.brn .lab{margin-top:6px;font-size:13px;font-weight:600;}
+.brn .sub{font-size:11px;color:var(--text-mute);margin-top:2px;}
+
+.tline{width:100%;max-width:320px;padding:10px 0;}
+.tline .track{position:relative;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--blue-soft) 0%,var(--blue-soft) 65%,#f0eeea 65%,#f0eeea 100%);border:1px solid var(--line);}
+.tline .pin{position:absolute;left:65%;top:-6px;transform:translateX(-50%);width:2px;height:22px;background:var(--blue);}
+.tline .pinlab{position:absolute;left:65%;top:-26px;transform:translateX(-50%);font-size:10px;color:var(--blue);font-weight:600;white-space:nowrap;}
+.tline .labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text-mute);margin-top:8px;}
+.tline .future{margin-top:18px;text-align:center;font-size:12px;color:var(--text-soft);}
+.tline .future .q{display:inline-block;padding:3px 10px;background:#f0eeea;border-radius:3px;color:var(--text-mute);animation:blinkQ 1.5s infinite;margin-left:4px;}
+@keyframes blinkQ{50%{opacity:.4;}}
+
+.lockbox{text-align:center;margin:0 16px;}
+.lockbox .ic{font-size:36px;margin-bottom:4px;}
+.lockbox .lb{font-size:13px;font-weight:600;}
+.lockbox .sm{font-size:11px;color:var(--text-mute);margin-top:2px;}
+
+.apibox{display:flex;align-items:center;gap:10px;font-size:11.5px;}
+.apibox .box{background:var(--text);color:#fff;border-radius:6px;padding:14px 18px;font-weight:600;font-size:13px;}
+.apibox .io{display:flex;flex-direction:column;gap:6px;}
+.apibox .io .r{background:#fff;border:1px solid var(--line);border-radius:4px;padding:3px 8px;animation:fadeIn .5s both;}
+
+.essence{margin-top:28px;padding:18px 20px;background:var(--bg-soft);border-radius:6px;font-size:15px;line-height:1.75;}
+.essence .big{font-size:17px;font-weight:600;display:block;margin-bottom:6px;}
+.essence .sm{color:var(--text-soft);font-size:14px;}
+
+@media (max-width:900px){.grid{grid-template-columns:repeat(3,1fr);}}
+@media (max-width:720px){.grid{grid-template-columns:repeat(2,1fr);}.detail .body{grid-template-columns:1fr;}}
+@media (max-width:460px){.grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <h1>📖 AI 术语图鉴 · 20 个零基础扫盲词</h1>
+    <div class="sub">点任一张卡片 · 看见它到底是什么 · 不死记硬背</div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="grid" id="grid"></div>
+  <div class="detail empty" id="detail">
+    点上面任一张卡片，这里会展开它的迷你演示。
+  </div>
+  <div class="essence">
+    <span class="big">术语本身不重要，重要的是你知道它「在干什么」。</span>
+    <span class="sm">第一次见不懂很正常——回到这本图鉴看 3 次，再到实际产品里撞见一次，就刻进脑子里了。</span>
+  </div>
+</div>
+
+<script>
+const CATS = [
+  { id:'all',   name:'全部' },
+  { id:'io',    name:'输入输出' },
+  { id:'mech',  name:'机制' },
+  { id:'ext',   name:'扩展能力' },
+  { id:'safe',  name:'安全边界' },
+  { id:'scale', name:'规模生态' }
+];
+
+const TERMS = [
+  // ========== IO ==========
+  { id:'prompt', cat:'io', emoji:'📝', name:'Prompt', en:'提示词',
+    one:'你输入给 AI 的指令或问题',
+    analogy:'跟餐厅服务员说的点餐需求',
+    long:'Prompt 是你与 AI 对话的每一句话。<b>清晰的 prompt = 70% 的答案质量</b>。模糊→模糊，具体→具体。',
+    ex:'❌ 写点关于猫的东西　→　✅ 用 200 字写一首关于橘猫睡懒觉的现代诗，语气温柔',
+    build(s){
+      s.innerHTML = '<div class="chat"></div>';
+      const ch = s.querySelector('.chat');
+      const steps = [['u','用 200 字写一首<br>关于橘猫睡懒觉的现代诗'],['ai','📝 午后的阳光<br>停在你蜷起的背脊上<br>整个世界都放慢了...']];
+      this._loop(ch, steps);
+    }
+  },
+  { id:'sysprompt', cat:'io', emoji:'⚙️', name:'System Prompt', en:'系统提示词',
+    one:'给 AI 预设「你是谁、怎么回答」的隐藏指令',
+    analogy:'员工入职时的岗位说明书',
+    long:'System Prompt 在对话开始前就注入，用户看不到但全程起作用。它定义 AI 的<b>身份、语气、边界</b>——这是 PM 设计 AI 产品的第一道抓手。',
+    ex:'客服机器人的 system：「你是 XX 品牌客服，只回答订单相关问题，语气温和，遇到投诉请升级。」',
+    build(s){
+      s.innerHTML = '<div class="chat"></div>';
+      const ch = s.querySelector('.chat');
+      const steps = [
+        ['sys','[系统] 你是 Notion 客服，语气亲切，只答产品问题'],
+        ['u','在吗？'],
+        ['ai','嗨～我在的！有什么关于 Notion 可以帮你的吗？']
+      ];
+      this._loop(ch, steps);
+    }
+  },
+  { id:'token', cat:'io', emoji:'🧱', name:'Token', en:'令牌',
+    one:'AI 处理文本的最小积木块',
+    analogy:'乐高积木——一块一块拼出一整段话',
+    long:'AI 不是按「字」或「词」处理文本，而是按 token。大约 <b>1 个中文字 ≈ 1-2 个 token，4 个英文字母 ≈ 1 个 token</b>。输入越长、tokens 越多、成本越高。',
+    ex:'「机器学习很有趣」≈ 7 个 token。「Hello world」≈ 2 个 token。',
+    build(s){
+      const txt = ['机','器','学','习','很','有','趣'];
+      s.innerHTML = '<div style="text-align:center;"><div style="font-size:14px;color:var(--text-soft);margin-bottom:12px;">「机器学习很有趣」被切成：</div><div class="tok-row"></div></div>';
+      const row = s.querySelector('.tok-row');
+      const run = ()=>{
+        row.innerHTML='';
+        txt.forEach((t,i)=>{
+          const el = document.createElement('span');
+          el.className = 'tok-tile';
+          el.style.setProperty('--d', (i*0.15)+'s');
+          el.textContent = t;
+          row.appendChild(el);
+        });
+      };
+      run();
+      this._timer = setInterval(()=>{ if(!s.isConnected) return; run(); }, 3500);
+    }
+  },
+
+  // ========== MECH ==========
+  { id:'ctxwin', cat:'mech', emoji:'🪟', name:'Context Window', en:'上下文窗口',
+    one:'AI 一次能「记住」的最大文本长度',
+    analogy:'AI 的「工作记忆」——窗口外的就忘了',
+    long:'窗口用 token 衡量。<b>GPT-4o ≈ 128K tokens（约 30 万汉字）；Gemini 2.5 ≈ 1M</b>。超出窗口的内容会被截断，AI 就真的「看不见」了。',
+    ex:'读一本 50 万字的小说需要窗口 ≥ 200K tokens，否则 AI 只能读一半。',
+    build(s){
+      const lines = ['从前有座山','山里有座庙','庙里有个老和尚','在给小和尚讲故事','故事是从前有座山','山里有座庙','庙里有个老和尚','在给小和尚讲故事'];
+      s.innerHTML = '<div class="ctxw" style="position:relative;height:220px;"><div class="win"></div>' + lines.map(l=>'<p>'+l+'</p>').join('') + '</div>';
+    }
+  },
+  { id:'embedding', cat:'mech', emoji:'📍', name:'Embedding', en:'向量嵌入',
+    one:'把文字翻译成坐标，让机器能算「相似度」',
+    analogy:'给每个词一个 GPS 坐标，意思近的词坐标也近',
+    long:'每个词/句子会被转成一串数字（向量），比如 768 维。<b>意思相近的向量在高维空间里距离更近</b>——这是 RAG、语义搜索、推荐系统的底层。',
+    ex:'「猫」和「狗」的向量距离近；「猫」和「火箭」的向量距离远。',
+    build(s){
+      s.innerHTML = '<div class="plane" style="max-width:320px;"></div>';
+      const p = s.querySelector('.plane');
+      const items = [
+        ['🐱 猫', 18, 28, true],
+        ['🐕 狗', 10, 45, true],
+        ['🐯 虎', 30, 18, true],
+        ['🚗 汽车', 70, 65, false],
+        ['🚀 火箭', 80, 75, false],
+        ['🍎 苹果', 55, 15, false]
+      ];
+      items.forEach((it,i)=>{
+        const d = document.createElement('div');
+        d.className = 'dot' + (it[3]?' hi':'');
+        d.style.left = it[1]+'%';
+        d.style.top = it[2]+'%';
+        d.style.setProperty('--d', (i*0.1)+'s');
+        d.textContent = it[0];
+        p.appendChild(d);
+      });
+    }
+  },
+  { id:'temp', cat:'mech', emoji:'🌡️', name:'Temperature', en:'温度',
+    one:'控制 AI 保守还是放飞的参数',
+    analogy:'调咖啡的糖——少了规矩，多了惊喜',
+    long:'每步预测下一个词时，T=0 <b>只挑概率最高那个</b>（稳定、重复）；T=1 <b>按原始概率抽</b>（平衡）；T=2 <b>分布压平</b>（冷门词也有机会，创意但容易跑偏）。',
+    ex:'写合同 / 写代码 → T=0~0.3；聊天 → T=0.7；写诗头脑风暴 → T=1+。',
+    build(s){
+      s.innerHTML = `<div class="temp-ui">
+        <div class="tbar"><div class="bw">好</div><div class="bt"><div class="bf" data-base="62"></div></div><div class="bp"></div></div>
+        <div class="tbar"><div class="bw">不错</div><div class="bt"><div class="bf" data-base="24"></div></div><div class="bp"></div></div>
+        <div class="tbar"><div class="bw">差</div><div class="bt"><div class="bf" data-base="8"></div></div><div class="bp"></div></div>
+        <div class="tbar"><div class="bw">糟糕</div><div class="bt"><div class="bf" data-base="4"></div></div><div class="bp"></div></div>
+        <div class="tbar"><div class="bw">凉</div><div class="bt"><div class="bf" data-base="2"></div></div><div class="bp"></div></div>
+        <div class="slider"><span>T=</span><span class="tlab">0.8</span><input type="range" min="0" max="20" value="8"></div>
+      </div>`;
+      const bars = s.querySelectorAll('.tbar');
+      const slider = s.querySelector('input');
+      const lab = s.querySelector('.tlab');
+      const update = ()=>{
+        const T = parseInt(slider.value)/10;
+        lab.textContent = T.toFixed(1);
+        // redistribute: softmax-like with T
+        const bases = Array.from(bars).map(b=>parseFloat(b.querySelector('.bf').dataset.base));
+        const expVals = bases.map(b=>Math.pow(b, T<0.05?50:1/Math.max(T,0.05)));
+        const sum = expVals.reduce((a,b)=>a+b,0);
+        const pcts = expVals.map(v=>v/sum*100);
+        bars.forEach((b,i)=>{
+          b.querySelector('.bf').style.width = pcts[i]+'%';
+          b.querySelector('.bp').textContent = pcts[i].toFixed(0)+'%';
+        });
+      };
+      slider.oninput = update;
+      update();
+    }
+  },
+  { id:'cot', cat:'mech', emoji:'🧮', name:'CoT / Reasoning', en:'思维链 / 推理',
+    one:'让模型先在草稿纸上一步步想',
+    analogy:'学霸做题要打草稿，不凭感觉直接写',
+    long:'普通模型直接出答案，易错；推理模型（o1、DeepSeek-R1、Claude Opus thinking）会先<b>内部生成推理过程</b>再给结论，<b>数学/代码/逻辑</b>任务准确率大幅提升，代价是更慢更贵。',
+    ex:'7 × 23 = ？　普通模型可能猜 161。推理模型：7×20=140, 7×3=21, 140+21=161 ✓',
+    build(s){
+      s.innerHTML = '<div class="cot"></div>';
+      const box = s.querySelector('.cot');
+      const steps = [
+        ['u','7 × 23 = ?'],
+        ['think','🤔 推理中...<br>step 1：拆成 7×20 + 7×3<br>step 2：7×20 = 140<br>step 3：7×3 = 21<br>step 4：140 + 21 = 161'],
+        ['ai','161']
+      ];
+      this._loopThink(box, steps);
+    }
+  },
+
+  // ========== EXT ==========
+  { id:'finetune', cat:'ext', emoji:'🎓', name:'Fine-tuning', en:'微调',
+    one:'在通用模型基础上再训练，让它专精某个领域',
+    analogy:'通才医生去进修心外科，变成专科医生',
+    long:'拿一个已经训练好的基础模型（如 Llama），用<b>你自己的数据</b>再训练一小段，让它学会特定领域的风格/术语/判断。成本比从零训练低千倍。',
+    ex:'用 10 万条法律问答微调，让它能像资深律师一样分析合同条款。',
+    build(s){
+      s.innerHTML = `<div class="flow">
+        <div class="node" style="--d:0s"><span class="ei">🧠</span>通用模型</div>
+        <span class="arrow" style="--d:.4s">＋</span>
+        <div class="node" style="--d:.6s"><span class="ei">📚</span>法律数据</div>
+        <span class="arrow" style="--d:1s">→</span>
+        <div class="node hi" style="--d:1.2s"><span class="ei">⚖️</span>法律专家</div>
+      </div>`;
+    }
+  },
+  { id:'rag', cat:'ext', emoji:'📚', name:'RAG', en:'检索增强生成',
+    one:'AI 先翻书查资料，再回答',
+    analogy:'开卷考试——不用背，现翻',
+    long:'问题先在<b>知识库里搜相关片段</b>（靠 embedding 算相似度），把找到的内容<b>拼进 prompt</b>，再让 AI 基于这些事实生成答案。有效缓解幻觉 + 知识滞后。',
+    ex:'企业内部助手基本都是 RAG——把公司文档做成向量库，员工提问时实时检索。',
+    build(s){
+      s.innerHTML = `<div class="flow">
+        <div class="node" style="--d:0s"><span class="ei">❓</span>问题</div>
+        <span class="arrow" style="--d:.3s">→</span>
+        <div class="node" style="--d:.5s"><span class="ei">📚</span>知识库<br>搜索</div>
+        <span class="arrow" style="--d:.8s">→</span>
+        <div class="node hi" style="--d:1s"><span class="ei">📄</span>相关片段</div>
+        <span class="arrow" style="--d:1.3s">→</span>
+        <div class="node hi" style="--d:1.5s"><span class="ei">💬</span>AI 答</div>
+      </div>`;
+    }
+  },
+  { id:'funccall', cat:'ext', emoji:'🛠️', name:'Function Call', en:'函数调用',
+    one:'AI 自己决定调哪个外部工具拿结果',
+    analogy:'服务员不做菜，但会跟厨房下单',
+    long:'开发者声明一组函数（查天气/发邮件/算数…），AI 看到问题后<b>自主判断要调哪个、传什么参数</b>，调用结果返回给它再组织语言回复。是 Agent 能干活的底层。',
+    ex:'用户问「明天上海天气」→ AI 调 get_weather(city="上海", date="+1d") → 得到 22°C 多云 → 组织成回复。',
+    build(s){
+      s.innerHTML = `<div class="flow">
+        <div class="node" style="--d:0s"><span class="ei">🧠</span>AI</div>
+        <span class="arrow" style="--d:.3s">→</span>
+        <div class="node hi" style="--d:.5s"><span class="ei">🛠️</span>get_weather()</div>
+        <span class="arrow" style="--d:.8s">→</span>
+        <div class="node" style="--d:1s"><span class="ei">🌤️</span>28°C</div>
+        <span class="arrow" style="--d:1.3s">→</span>
+        <div class="node hi" style="--d:1.5s"><span class="ei">💬</span>「28 度」</div>
+      </div>`;
+    }
+  },
+  { id:'skill', cat:'ext', emoji:'🎯', name:'Skill', en:'技能',
+    one:'把一组函数+提示词+流程打包成可复用模块',
+    analogy:'厨师的拿手菜谱——整套流程一键上菜',
+    long:'单个 Function Call 是一颗螺丝，Skill 是<b>一整套工具箱</b>——包含多个函数调用、专属 system prompt、工作流编排。比如「周报生成技能」= 搜数据 + 分析 + 排版 + 发送，一键触发。',
+    ex:'Claude Skills、GPT Actions、Notion AI 自定义技能——都是这个思路。',
+    build(s){
+      s.innerHTML = `<div style="text-align:center;width:100%;">
+        <div class="flow" style="margin-bottom:12px;">
+          <div class="node" style="--d:0s"><span class="ei">🔍</span>搜数据</div>
+          <div class="node" style="--d:.15s"><span class="ei">📊</span>分析</div>
+          <div class="node" style="--d:.3s"><span class="ei">✍️</span>排版</div>
+          <div class="node" style="--d:.45s"><span class="ei">📧</span>发送</div>
+        </div>
+        <span class="arrow fadeIn" style="animation-delay:.7s;font-size:20px;">↓ 打包 ↓</span>
+        <div style="margin-top:12px;"><div class="node hi fadeIn" style="animation-delay:1s;padding:12px 24px;display:inline-block;"><span class="ei">🎯</span>周报生成技能</div></div>
+      </div>`;
+    }
+  },
+  { id:'mcp', cat:'ext', emoji:'🔌', name:'MCP', en:'模型上下文协议',
+    one:'AI 连接外部工具的统一接口标准',
+    analogy:'USB-C——一根线走天下',
+    long:'Anthropic 2024 年推的<b>开放协议</b>。以前每个工具（Notion/GitHub/数据库…）要单独对接每个 AI，接口乱七八糟。有了 MCP，工具实现一次 MCP server，所有 AI 都能用。',
+    ex:'Claude Desktop、Cursor、Windsurf 都支持 MCP——同一个 Notion MCP Server 给它们全用。',
+    build(s){
+      s.innerHTML = `<div class="hub">
+        <svg><line x1="50%" y1="50%" x2="15%" y2="15%" class="hi"/><line x1="50%" y1="50%" x2="85%" y2="15%" class="hi"/><line x1="50%" y1="50%" x2="15%" y2="85%" class="hi"/><line x1="50%" y1="50%" x2="85%" y2="85%" class="hi"/></svg>
+        <div class="core">🧠</div>
+        <div class="spoke hi" style="left:5%;top:5%;--d:.2s">📝 Notion</div>
+        <div class="spoke hi" style="right:5%;top:5%;--d:.4s">🐙 GitHub</div>
+        <div class="spoke hi" style="left:5%;bottom:5%;--d:.6s">📅 Calendar</div>
+        <div class="spoke hi" style="right:5%;bottom:5%;--d:.8s">💾 数据库</div>
+      </div>
+      <div style="text-align:center;font-size:11px;color:var(--text-mute);margin-top:8px;">同一套 MCP 接口，任何 AI 都能插</div>`;
+    }
+  },
+  { id:'agent', cat:'ext', emoji:'🤖', name:'Agent', en:'智能体',
+    one:'能自己规划步骤、调工具、完成任务的 AI',
+    analogy:'从「答题机器人」进化成「会干活的助理」',
+    long:'普通 Chatbot 只会「一问一答」。Agent 会<b>拆任务 → 调工具 → 检查结果 → 修正 → 继续</b>，直到完成目标。背后通常是 LLM + Function Call + 循环控制 + 记忆。',
+    ex:'「帮我订明天北京飞上海的机票」→ 查航班 → 比价 → 选位 → 付款 → 发确认邮件，全自动。',
+    build(s){
+      s.innerHTML = `<div style="width:100%;max-width:300px;font-size:13px;">
+        <div class="bbl u fadeIn" style="display:block;margin-bottom:10px;">订明天北京飞上海的机票</div>
+        <div style="background:#fff;border:1px solid var(--line);border-radius:6px;padding:10px 14px;">
+          <div class="fadeIn" style="animation-delay:.3s;font-size:12px;line-height:1.9;">
+            ✅ 查询航班<br>
+            ✅ 比价选最优<br>
+            ✅ 选择座位<br>
+            ✅ 完成付款<br>
+            ✅ 发送确认邮件
+          </div>
+        </div>
+      </div>`;
+    }
+  },
+
+  // ========== SAFE ==========
+  { id:'hall', cat:'safe', emoji:'⚠️', name:'Hallucination', en:'幻觉',
+    one:'AI 一本正经地胡说八道',
+    analogy:'自信满满的错误答案',
+    long:'因为 LLM 只求<b>「下一个词听起来合理」</b>，不求事实正确。不知道答案时照样能编得煞有介事——这是 LLM 的结构性问题，无法根治，只能用 RAG / 引用溯源 / 人工核验来缓解。',
+    ex:'让 AI 推荐论文 → 给出的作者、标题、期刊都像真的，但你去搜根本不存在。',
+    build(s){
+      s.innerHTML = '<div class="chat"></div>';
+      const ch = s.querySelector('.chat');
+      const steps = [
+        ['u','爱因斯坦获得过哪个诺贝尔奖？'],
+        ['err','爱因斯坦因相对论获得 1921 年诺贝尔化学奖 ✨'],
+        ['sys','⚠️ 真相：是物理奖，且不是因为相对论']
+      ];
+      this._loop(ch, steps);
+    }
+  },
+  { id:'cutoff', cat:'safe', emoji:'📅', name:'Knowledge Cutoff', en:'知识截止',
+    one:'模型训练数据的最后日期',
+    analogy:'高考完就不再学习——不联网就停在那一天',
+    long:'模型训练需要几个月，训练完数据就<b>冻结在某个日期</b>。问它之后发生的事，它要么说不知道、要么胡编。解决：加联网搜索 / RAG 实时知识库。',
+    ex:'GPT-4o 截止 2024-10；Claude 3.5 截止 2024-04。问「2025 奥斯卡最佳影片」→ 不联网答不出来。',
+    build(s){
+      s.innerHTML = `<div class="tline">
+        <div class="track"><div class="pinlab">知识截止</div><div class="pin"></div></div>
+        <div class="labels"><span>训练开始</span><span style="color:var(--blue);">2024-10</span><span>今天</span></div>
+        <div class="future">这之后发生的事 →<span class="q">? ? ?</span></div>
+      </div>`;
+    }
+  },
+
+  // ========== SCALE ==========
+  { id:'param', cat:'scale', emoji:'🎛️', name:'Parameter', en:'参数量',
+    one:'模型内部「旋钮」的数量',
+    analogy:'大脑神经元连接数——多不一定最好，但上限更高',
+    long:'B = Billion（10 亿）。<b>参数越多通常越聪明</b>，但也越慢越贵。2025 的主流：7B 手机端跑，70B 消费显卡跑，400B+ 需要集群。Mini 模型走小参数 + 高效蒸馏路线，也能打。',
+    ex:'GPT-4o ≈ 1.76T（万亿）参数，GPT-4o-mini ≈ 8B；Llama 3 70B 家用电脑可跑。',
+    build(s){
+      const mkDots = (n, c)=>{
+        let h = '';
+        for(let i=0;i<n;i++) h += '<div class="dot" style="--d:'+(i*0.05)+'s"></div>';
+        return '<div class="dots" style="grid-template-columns:repeat('+c+',1fr);">'+h+'</div>';
+      };
+      s.innerHTML = `<div class="brains">
+        <div class="brn"><div class="face">🧠</div>${mkDots(16,4)}<div class="lab">7B</div><div class="sub">手机就能跑</div></div>
+        <div class="brn"><div class="face">🧠</div>${mkDots(100,10)}<div class="lab">70B</div><div class="sub">家用显卡</div></div>
+        <div class="brn"><div class="face">🧠</div>${mkDots(225,15)}<div class="lab">400B+</div><div class="sub">数据中心</div></div>
+      </div>`;
+    }
+  },
+  { id:'multi', cat:'scale', emoji:'🎨', name:'Multimodal', en:'多模态',
+    one:'同时看懂文字、图片、音频、视频',
+    analogy:'从「只会读书」进化到「能看能听能说」',
+    long:'传统 LLM 只吃文字，多模态模型能处理<b>多种输入</b>：GPT-4o 能看图听声、Gemini 能分析视频、Sora 能生成视频。这是通往「通用助手」的关键一步。',
+    ex:'拍一张冰箱内部 → AI 识别食材 → 推荐今晚做什么菜 → 生成购物清单。',
+    build(s){
+      s.innerHTML = `<div class="hub">
+        <svg><line x1="50%" y1="50%" x2="10%" y2="50%" class="hi"/><line x1="50%" y1="50%" x2="90%" y2="50%" class="hi"/><line x1="50%" y1="50%" x2="50%" y2="10%" class="hi"/><line x1="50%" y1="50%" x2="50%" y2="90%" class="hi"/></svg>
+        <div class="core">🧠</div>
+        <div class="spoke hi" style="left:0;top:50%;transform:translateY(-50%);--d:.1s">📝 文字</div>
+        <div class="spoke hi" style="right:0;top:50%;transform:translateY(-50%);--d:.2s">🖼️ 图片</div>
+        <div class="spoke hi" style="left:50%;top:0;transform:translateX(-50%);--d:.3s">🔊 音频</div>
+        <div class="spoke hi" style="left:50%;bottom:0;transform:translateX(-50%);--d:.4s">🎬 视频</div>
+      </div>`;
+    }
+  },
+  { id:'moe', cat:'scale', emoji:'🧩', name:'MoE', en:'混合专家',
+    one:'大模型里有很多「专家」，每次只叫醒几个',
+    analogy:'公司有 8 个部门，来一个问题只找相关的两个',
+    long:'Mixture of Experts。总参数很大（比如 400B），但每次推理<b>只激活其中 10%~25%</b>，速度快成本低。DeepSeek V3、Mixtral、GPT-4 据传都是 MoE。',
+    ex:'问「写首诗」→ 激活「语言 + 创意」专家；问「算数」→ 激活「数学 + 逻辑」专家。',
+    build(s){
+      s.innerHTML = `<div class="hub">
+        <svg id="moeSvg"></svg>
+        <div class="core">🧠</div>
+        <div class="spoke hi"   style="left:5%;top:10%;--d:.1s">✍️ 语言</div>
+        <div class="spoke dim"  style="left:5%;top:45%;--d:.1s">💻 代码</div>
+        <div class="spoke dim"  style="left:5%;top:80%;--d:.1s">🔬 科学</div>
+        <div class="spoke hi"   style="right:5%;top:10%;--d:.1s">🎨 创意</div>
+        <div class="spoke dim"  style="right:5%;top:45%;--d:.1s">📊 数学</div>
+        <div class="spoke dim"  style="right:5%;top:80%;--d:.1s">⚖️ 法律</div>
+      </div>
+      <div style="text-align:center;font-size:11px;color:var(--text-mute);margin-top:8px;">问「写首诗」→ 只激活蓝色的 2 个专家</div>`;
+    }
+  },
+  { id:'opensrc', cat:'scale', emoji:'🔓', name:'Open Source', en:'开源',
+    one:'模型权重公开，任何人可下载使用',
+    analogy:'菜谱公开了——你可以自己做也可以改良',
+    long:'<b>开源模型</b>（Llama、Qwen、DeepSeek、Mistral）：权重公开，能本地部署、私有微调、商用。<b>闭源模型</b>（GPT、Claude、Gemini）：只能通过 API 访问，数据要送到云端。',
+    ex:'涉及敏感数据（医疗/法律）→ 倾向开源本地部署；追求最强效果 → 闭源 API。',
+    build(s){
+      s.innerHTML = `<div style="display:flex;gap:30px;justify-content:center;align-items:flex-start;">
+        <div class="lockbox"><div class="ic">🔒</div><div class="lb">闭源</div><div class="sm">GPT / Claude<br>只能用 API</div></div>
+        <div class="lockbox"><div class="ic">🔓</div><div class="lb">开源</div><div class="sm">Llama / Qwen<br>下载 · 微调 · 私有部署</div></div>
+      </div>`;
+    }
+  },
+  { id:'api', cat:'scale', emoji:'🚪', name:'API', en:'应用编程接口',
+    one:'其他程序调用 AI 能力的标准窗口',
+    analogy:'餐厅的外卖窗口——不用进厨房也能拿到菜',
+    long:'程序通过 HTTP 请求发 prompt，拿到 AI 回复。<b>按 token 收费</b>（输入+输出分开算）。几乎所有 AI 产品都是在 API 基础上包一层 UI + 业务逻辑。',
+    ex:'OpenAI API、Anthropic API、阿里百炼、硅基流动——都是这类入口。',
+    build(s){
+      s.innerHTML = `<div class="apibox">
+        <div class="io"><div class="r fadeIn" style="animation-delay:.1s">📩 请求</div><div class="r fadeIn" style="animation-delay:.2s">{prompt:...}</div></div>
+        <div class="box">AI<br>API</div>
+        <div class="io"><div class="r fadeIn" style="animation-delay:.6s">📤 响应</div><div class="r fadeIn" style="animation-delay:.7s">{answer:...}</div></div>
+      </div>`;
+    }
+  }
+];
+
+// shared helpers
+TERMS.forEach(t=>{
+  t._loop = function(box, steps){
+    let i = 0;
+    const tick = ()=>{
+      if(!box.isConnected) return;
+      if(i >= steps.length){ box.innerHTML=''; i=0; setTimeout(tick, 600); return; }
+      const [cls, txt] = steps[i++];
+      const b = document.createElement('div');
+      b.className = 'bbl ' + cls + ' fadeIn';
+      b.innerHTML = txt;
+      box.appendChild(b);
+      setTimeout(tick, 1500);
+    };
+    tick();
+  };
+  t._loopThink = function(box, steps){
+    let i = 0;
+    const tick = ()=>{
+      if(!box.isConnected) return;
+      if(i >= steps.length){ box.innerHTML=''; i=0; setTimeout(tick, 600); return; }
+      const [cls, txt] = steps[i++];
+      const b = document.createElement('div');
+      if(cls==='think'){ b.className='think fadeIn'; b.innerHTML='<div>'+txt+'</div>'; }
+      else{ b.className='bbl '+cls+' fadeIn'; b.innerHTML=txt; }
+      box.appendChild(b);
+      setTimeout(tick, cls==='think'?2500:1200);
+    };
+    tick();
+  };
+});
+
+const tabsEl = document.getElementById('tabs');
+const gridEl = document.getElementById('grid');
+const detailEl = document.getElementById('detail');
+
+let currentCat = 'all';
+let currentId = null;
+
+function renderTabs(){
+  tabsEl.innerHTML = '';
+  CATS.forEach(c=>{
+    const n = c.id==='all' ? TERMS.length : TERMS.filter(t=>t.cat===c.id).length;
+    const el = document.createElement('span');
+    el.className = 'tab' + (c.id===currentCat?' active':'');
+    el.innerHTML = c.name + '<span class="cnt">'+n+'</span>';
+    el.onclick = ()=>{ currentCat = c.id; renderTabs(); renderGrid(); };
+    tabsEl.appendChild(el);
+  });
+}
+function renderGrid(){
+  gridEl.innerHTML = '';
+  TERMS.forEach(t=>{
+    const show = currentCat==='all' || t.cat===currentCat;
+    if(!show) return;
+    const el = document.createElement('div');
+    el.className = 'card' + (currentId===t.id?' active':'');
+    el.innerHTML = '<div class="em">'+t.emoji+'</div><div class="nm">'+t.name+'</div><div class="en">'+t.en+'</div><div class="one">'+t.one+'</div>';
+    el.onclick = ()=>{ selectTerm(t.id); };
+    gridEl.appendChild(el);
+  });
+}
+function selectTerm(id){
+  currentId = id;
+  const t = TERMS.find(x=>x.id===id);
+  if(!t) return;
+  const cat = CATS.find(c=>c.id===t.cat);
+  detailEl.classList.add('fade');
+  setTimeout(()=>{
+    detailEl.classList.remove('empty');
+    detailEl.innerHTML = `
+      <div class="head">
+        <div class="title"><span class="em">${t.emoji}</span><span class="nm">${t.name}</span><span class="en">${t.en}</span><span class="tag">${cat.name}</span></div>
+        <div class="ana">${t.analogy}</div>
+      </div>
+      <div class="body">
+        <div class="stage" id="stage"></div>
+        <div class="explain"><p>${t.long}</p><div class="ex">${t.ex}</div></div>
+      </div>`;
+    const stage = detailEl.querySelector('#stage');
+    try{ t.build(stage); }catch(e){ stage.textContent='[demo error]'; }
+    detailEl.classList.remove('fade');
+    // Scroll the detail into view smoothly
+    detailEl.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    renderGrid();
+  }, 180);
+}
+
+renderTabs();
+renderGrid();
+// auto-select first term to avoid empty panel
+selectTerm('prompt');
+</script>
+</body>
+</html>

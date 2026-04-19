@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>深度学习 · 剖开神经网络看一看</title>
+<style>
+:root{
+  --text:#37352f; --text-soft:#787774; --text-mute:#9b9a97;
+  --line:#e9e9e7; --bg:#fff; --bg-soft:#f7f6f3; --bg-hover:#efeeec;
+  --blue:#2383e2; --blue-soft:#e7f3fb;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  color:var(--text); background:var(--bg); line-height:1.7;
+  display:flex; justify-content:center;
+}
+.app{ max-width:1080px; width:100%; padding:32px 24px 48px; }
+.top h1{ font-size:28px; font-weight:700; letter-spacing:-.5px; }
+.top .sub{ color:var(--text-soft); font-size:15px; margin-top:8px; }
+
+.crumb{ display:flex; gap:2px; flex-wrap:wrap; margin:24px 0 14px; font-size:13px; }
+.crumb .c{ padding:4px 10px; border-radius:4px; cursor:pointer; color:var(--text-mute); transition:all .15s; }
+.crumb .c.active{ background:var(--blue-soft); color:var(--blue); font-weight:500; }
+.crumb .c:hover:not(.active){ background:var(--bg-hover); color:var(--text); }
+.crumb .sep{ color:var(--text-mute); padding:4px 2px; user-select:none; }
+
+/* ===== Neural Network (Notion style) ===== */
+.sci-net{
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 22px 20px 14px;
+  display: flex; align-items: center; gap: 12px;
+  position: relative; overflow: hidden;
+  min-height: 320px;
+}
+.sci-cap{
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  flex: 0 0 auto; z-index:2; min-width:72px;
+}
+.sci-cap .sci-emoji{ font-size:42px; line-height:1; }
+.sci-cap .sci-caplab{ font-size:11px; color:var(--text-mute); letter-spacing:1px; text-transform:uppercase; }
+.sci-svg{ flex:1; width:100%; height:auto; z-index:1; position:relative; }
+.sci-svg .link{ stroke:#c4c3c0; stroke-width:0.6; fill:none; opacity:.45; }
+.sci-svg .link.hot{
+  stroke:url(#signalGrad); stroke-width:1.3; opacity:.9;
+  stroke-dasharray: 10 190;
+  animation: flowSig 2.6s linear infinite;
+}
+@keyframes flowSig{ from{stroke-dashoffset:200} to{stroke-dashoffset:0} }
+.sci-svg .link.boost{
+  stroke:var(--blue) !important; stroke-width:1.1; opacity:.8;
+}
+.sci-svg .node{
+  fill:#ffffff; stroke:#b5b4b1; stroke-width:1;
+  transition: fill .35s, stroke .35s, filter .35s;
+}
+.sci-svg .node.active{
+  fill:var(--blue); stroke:#ffffff; stroke-width:1.5;
+  animation: nodeThrob 1.8s ease-in-out infinite;
+}
+@keyframes nodeThrob{
+  0%,100%{ filter: drop-shadow(0 0 3px rgba(35,131,226,.4)); }
+  50%{ filter: drop-shadow(0 0 7px rgba(35,131,226,.65)); }
+}
+.sci-svg .collbl{
+  fill:var(--text-soft); font-size:11px; font-family: inherit; letter-spacing:1.2px;
+  text-transform:uppercase; transition: fill .2s; cursor:pointer;
+  user-select:none;
+}
+.sci-svg .collbl:hover{ fill:var(--text); }
+.sci-svg .collbl.active{ fill:var(--blue); font-weight:700; }
+
+.detail{
+  margin-top:18px; border:1px solid var(--line); border-radius:8px;
+  padding:24px; background:#fff; min-height:180px;
+  transition:opacity .15s;
+}
+.detail.fade{ opacity:0; }
+.detail .dlabel{ font-size:11px; color:var(--blue); font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; }
+.detail .dlabel::before{ content:'●'; margin-right:6px; animation:pulse 1.4s ease-in-out infinite; display:inline-block; }
+@keyframes pulse{ 0%,100%{opacity:.4} 50%{opacity:1} }
+.detail .dtitle{ font-size:19px; font-weight:600; margin-bottom:10px; }
+.detail .dtext{ color:var(--text-soft); font-size:15px; margin-bottom:18px; line-height:1.7; }
+.detail .samples{ display:flex; gap:10px; flex-wrap:wrap; }
+.sample{
+  background:var(--bg-soft); border-radius:6px; padding:10px 14px;
+  font-size:13px; color:var(--text); display:flex; align-items:center; gap:8px;
+}
+.sample .se{ font-size:18px; line-height:1; }
+
+.ctrl{ display:flex; gap:10px; justify-content:center; margin-top:20px; }
+.btn{
+  font-family:inherit; font-size:13px; padding:7px 14px; border-radius:6px;
+  border:1px solid var(--line); background:#fff; color:var(--text); cursor:pointer;
+  transition:all .15s;
+}
+.btn:hover{ background:var(--bg-hover); }
+.btn.primary{ background:var(--blue); border-color:var(--blue); color:#fff; }
+.btn.primary:hover{ background:#1a6dc4; }
+
+.essence{
+  margin-top:26px; padding:18px 20px; background:var(--bg-soft);
+  border-radius:6px; font-size:15px; color:var(--text); line-height:1.75;
+}
+.essence .big{ font-size:17px; font-weight:600; margin-bottom:6px; display:block; }
+.essence .sm{ color:var(--text-soft); font-size:14px; }
+
+@media (max-width:720px){
+  .sci-net{ flex-direction:column; padding:18px 12px; min-height:auto; }
+  .sci-cap{ flex-direction:row; gap:10px; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <h1>🔬 深度学习 · 剖开神经网络看一看</h1>
+    <div class="sub">从像素到概念，一层一层看它脑子里在想什么 · 零基础友好</div>
+  </div>
+
+  <div class="crumb" id="crumb"></div>
+
+  <div class="sci-net">
+    <div class="sci-cap">
+      <div class="sci-emoji">🖼️</div>
+      <div class="sci-caplab">输入图片</div>
+    </div>
+    <svg class="sci-svg" id="sciSvg" viewBox="0 0 880 340" preserveAspectRatio="xMidYMid meet">
+      <defs>
+        <linearGradient id="signalGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stop-color="#2383e2" stop-opacity="0"/>
+          <stop offset="50%" stop-color="#2383e2" stop-opacity="1"/>
+          <stop offset="100%" stop-color="#2383e2" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <g id="links"></g>
+      <g id="nodes"></g>
+      <g id="collbls"></g>
+    </svg>
+    <div class="sci-cap">
+      <div class="sci-emoji">🐱</div>
+      <div class="sci-caplab">输出：猫</div>
+    </div>
+  </div>
+
+  <div class="detail" id="detail">
+    <div class="dlabel">当前透视</div>
+    <div class="dtitle" id="dtitle"></div>
+    <div class="dtext" id="dtext"></div>
+    <div class="samples" id="dsamples"></div>
+  </div>
+
+  <div class="ctrl">
+    <button class="btn primary" id="autoBtn">▶ 一层层自动看下去</button>
+    <button class="btn" id="resetBtn">回到第 0 层</button>
+  </div>
+
+  <div class="essence">
+    <span class="big">见得多了，自己就明白了 —— 而且是一层比一层"明白"得更深。</span>
+    <span class="sm">这就是「深度」学习：网络有几十到几百层，越深的层看到的东西越抽象。人不用再手工告诉机器"要看耳朵、看眼睛"，它自己就层层摸索出来了。</span>
+  </div>
+</div>
+
+<script>
+const LAYERS = [
+  { name:'像素', sub:'Layer 0',
+    title:'原始输入 · 只是一堆数字',
+    text:'机器拿到的不是"一张照片"，而是密密麻麻的数字——每个像素的亮度和颜色。它现在什么都不认识，连"这里有个东西"都不知道。',
+    samples:[['🔢','密密麻麻的数字'],['🎨','RGB 三个通道'],['⬜','比如 224×224 格子']]
+  },
+  { name:'边缘', sub:'Layer 1',
+    title:'第 1 层 · 看到边缘和线条',
+    text:'最浅的几层神经元学会识别最基础的东西：哪里有一条横线、哪里有一条斜线、哪里是明暗的交界。像用铅笔先把轮廓描一遍。',
+    samples:[['／','斜线'],['│','竖线'],['─','横线'],['◠','弧线']]
+  },
+  { name:'纹理', sub:'Layer 2',
+    title:'第 2 层 · 看到纹理和花纹',
+    text:'把短线组合起来，这一层开始识别重复的图案：毛发的走向、斑点的分布、条纹的密度。还不知道是什么动物，但知道"这块表面长什么样"。',
+    samples:[['〰️','毛发走向'],['◉','斑点'],['▦','条纹'],['🌀','漩涡']]
+  },
+  { name:'部位', sub:'Layer 3',
+    title:'第 3 层 · 看到身体部位',
+    text:'纹理和形状拼在一起，机器开始认出脸上的零件：一对尖尖的三角形原来是"耳朵"，两个圆圆的是"眼睛"，还有"鼻子"和"胡须"。',
+    samples:[['👁️','眼睛'],['👂','耳朵'],['👃','鼻子'],['➰','胡须']]
+  },
+  { name:'概念', sub:'Layer 4',
+    title:'第 4 层 · 看到「猫」这个概念',
+    text:'所有部位组合在一起——两只尖耳朵 + 两只圆眼睛 + 胡须 + 毛发纹理——机器终于敢下结论：这是一只猫。',
+    samples:[['🐱','猫'],['✅','置信度 97%']]
+  }
+];
+
+const crumbEl = document.getElementById('crumb');
+const detailEl = document.getElementById('detail');
+const dtitleEl = document.getElementById('dtitle');
+const dtextEl = document.getElementById('dtext');
+const dsamplesEl = document.getElementById('dsamples');
+const autoBtn = document.getElementById('autoBtn');
+const resetBtn = document.getElementById('resetBtn');
+
+let current = 0;
+let auto = null;
+
+LAYERS.forEach((L, i)=>{
+  const el = document.createElement('div');
+  el.className = 'layer';
+  el.dataset.i = i;
+  const rows = 3 + i;
+  let neurons = '';
+  for(let k=0; k<rows*2; k++) neurons += '<div class="n"></div>';
+  el.innerHTML = `
+    <div class="neurons">${neurons}</div>
+    <div class="lname">${L.name}</div>
+    <div class="lsub">${L.sub}</div>
+  `;
+  el.onclick = ()=>{ stopAuto(); select(i); };
+  /* legacy no-op */
+});
+
+// ===== Build sci-fi neural network =====
+const linksG = document.getElementById('links');
+const nodesG = document.getElementById('nodes');
+const collblsG = document.getElementById('collbls');
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const VB = { w:880, h:340, padX:70, padY:50 };
+const NODE_COUNTS = [7, 11, 13, 9, 5];
+const nodePos = [];
+const innerW = VB.w - VB.padX*2;
+const stepX = LAYERS.length>1 ? innerW/(LAYERS.length-1) : 0;
+LAYERS.forEach((L, ci)=>{
+  const x = VB.padX + stepX*ci;
+  const n = NODE_COUNTS[ci];
+  const gapY = n>1 ? (VB.h - VB.padY*2 - 30)/(n-1) : 0;
+  const startY = n>1 ? VB.padY : (VB.h-30)/2;
+  const col = [];
+  for(let k=0;k<n;k++){ col.push({ x, y: startY + gapY*k }); }
+  nodePos.push(col);
+});
+const allLinks = [];
+for(let ci=1; ci<LAYERS.length; ci++){
+  nodePos[ci-1].forEach(p1=>{
+    nodePos[ci].forEach(p2=>{
+      const ln = document.createElementNS(SVG_NS,'line');
+      ln.setAttribute('x1', p1.x); ln.setAttribute('y1', p1.y);
+      ln.setAttribute('x2', p2.x); ln.setAttribute('y2', p2.y);
+      ln.setAttribute('class','link');
+      ln.dataset.toCol = ci;
+      linksG.appendChild(ln);
+      allLinks.push(ln);
+    });
+  });
+}
+const hotCount = Math.min(60, Math.floor(allLinks.length*0.18));
+const shuf = [...allLinks].sort(()=>Math.random()-0.5);
+for(let i=0;i<hotCount;i++){
+  shuf[i].classList.add('hot');
+  shuf[i].style.animationDelay = (Math.random()*2.6).toFixed(2)+'s';
+}
+LAYERS.forEach((L, ci)=>{
+  nodePos[ci].forEach((p)=>{
+    const cir = document.createElementNS(SVG_NS,'circle');
+    cir.setAttribute('cx', p.x); cir.setAttribute('cy', p.y); cir.setAttribute('r', 5);
+    cir.setAttribute('class','node');
+    cir.dataset.col = ci;
+    cir.style.cursor = 'pointer';
+    cir.addEventListener('click', ()=>{ stopAuto(); select(ci); });
+    nodesG.appendChild(cir);
+  });
+  const lbl = document.createElementNS(SVG_NS,'text');
+  lbl.setAttribute('x', nodePos[ci][0].x);
+  lbl.setAttribute('y', VB.h - 10);
+  lbl.setAttribute('class','collbl');
+  lbl.setAttribute('text-anchor','middle');
+  lbl.dataset.col = ci;
+  lbl.textContent = L.name;
+  lbl.addEventListener('click', ()=>{ stopAuto(); select(ci); });
+  collblsG.appendChild(lbl);
+});
+
+function buildCrumb(){
+  crumbEl.innerHTML = '';
+  LAYERS.forEach((L,i)=>{
+    if(i>0){
+      const s = document.createElement('span');
+      s.className='sep'; s.textContent='›';
+      crumbEl.appendChild(s);
+    }
+    const c = document.createElement('span');
+    c.className = 'c' + (i===current?' active':'');
+    c.textContent = L.name;
+    c.onclick = ()=>{ stopAuto(); select(i); };
+    crumbEl.appendChild(c);
+  });
+}
+
+function select(i){
+  current = i;
+  nodesG.querySelectorAll('.node').forEach(nd=>{
+    nd.classList.toggle('active', parseInt(nd.dataset.col)===i);
+  });
+  collblsG.querySelectorAll('.collbl').forEach(lbl=>{
+    lbl.classList.toggle('active', parseInt(lbl.dataset.col)===i);
+  });
+  linksG.querySelectorAll('.link').forEach(ln=>{
+    ln.classList.toggle('boost', parseInt(ln.dataset.toCol)===i);
+  });
+  buildCrumb();
+  detailEl.classList.add('fade');
+  setTimeout(()=>{
+    const L = LAYERS[i];
+    dtitleEl.textContent = L.title;
+    dtextEl.textContent = L.text;
+    dsamplesEl.innerHTML = L.samples.map(s=>
+      `<div class="sample"><span class="se">${s[0]}</span>${s[1]}</div>`
+    ).join('');
+    detailEl.classList.remove('fade');
+  }, 150);
+}
+
+function stopAuto(){
+  if(auto){ clearInterval(auto); auto=null; autoBtn.textContent='▶ 一层层自动看下去'; }
+}
+autoBtn.onclick = ()=>{
+  if(auto){ stopAuto(); return; }
+  autoBtn.textContent='⏸ 暂停';
+  let i = current;
+  auto = setInterval(()=>{
+    i = (i+1) % LAYERS.length;
+    select(i);
+  }, 2200);
+};
+resetBtn.onclick = ()=>{ stopAuto(); select(0); };
+
+select(0);
+</script>
+</body>
+</html>
